@@ -1,5 +1,7 @@
 package com.akash.exiomstask.Activities;
 
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
@@ -8,6 +10,8 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
@@ -112,17 +116,41 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         });
     }
 
+    private void sendNotification() {
+        NotificationCompat.Builder mBuilder =
+                new NotificationCompat.Builder(this)
+                        .setSmallIcon(R.drawable.ic_android_black_24dp)
+                        .setContentTitle(Constant.NOTIFICATION_TITLE)
+                        .setContentText(Constant.NOTIFICATION_MESSAGE);
+        Intent resultIntent = new Intent(this, MainActivity.class);
+
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+        stackBuilder.addParentStack(MainActivity.class);
+        stackBuilder.addNextIntent(resultIntent);
+        PendingIntent resultPendingIntent =
+                stackBuilder.getPendingIntent(
+                        0,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                );
+        mBuilder.setContentIntent(resultPendingIntent);
+        mBuilder.setAutoCancel(true);
+        NotificationManager mNotificationManager =
+                (NotificationManager) getSystemService(this.NOTIFICATION_SERVICE);
+
+        mNotificationManager.notify(Constant.NOTIFICATION_ID, mBuilder.build());
+    }
+
     public void checkDistance() {
         // for km multiplied by 0.001
         double distanceInKm = mStartLocation.distanceTo(mDestinationLocation) * 0.001;
         Log.i(TAG, "distance between " + distanceInKm);
-
-        if (distanceInKm <= 1){
+        if (distanceInKm <= 1) {
+            sendNotification();
             updateStopButtonState();
         }
     }
 
-    public void updateStopButtonState(){
+    public void updateStopButtonState() {
         buttonStart.setVisibility(View.GONE);
         buttonStop.setVisibility(View.VISIBLE);
     }
