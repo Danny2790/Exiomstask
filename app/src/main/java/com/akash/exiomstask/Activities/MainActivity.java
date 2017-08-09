@@ -1,7 +1,5 @@
 package com.akash.exiomstask.Activities;
 
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
@@ -10,8 +8,6 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.TaskStackBuilder;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
@@ -25,6 +21,7 @@ import android.widget.Toast;
 
 import com.akash.exiomstask.Constants.Constant;
 import com.akash.exiomstask.R;
+import com.akash.exiomstask.Services.Notifyservice;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
@@ -56,8 +53,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private GoogleApiClient mGoogleApiClient;
     private Location mStartLocation;
     private Location mDestinationLocation;
-    private double mDestinaLat;
-    private double mDestinaLon;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,7 +95,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
             @Override
             public void onClick(View v) {
                 startLocationUpdates();
-                if (mStartLocation != null && mDestinaLat != 0 && mDestinaLon != 0) {
+                if (mStartLocation != null && mDestinationLocation != null) {
                     checkDistance();
                 }
             }
@@ -116,36 +111,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         });
     }
 
-    private void sendNotification() {
-        NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(this)
-                        .setSmallIcon(R.drawable.ic_android_black_24dp)
-                        .setContentTitle(Constant.NOTIFICATION_TITLE)
-                        .setContentText(Constant.NOTIFICATION_MESSAGE);
-        Intent resultIntent = new Intent(this, MainActivity.class);
-
-        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-        stackBuilder.addParentStack(MainActivity.class);
-        stackBuilder.addNextIntent(resultIntent);
-        PendingIntent resultPendingIntent =
-                stackBuilder.getPendingIntent(
-                        0,
-                        PendingIntent.FLAG_UPDATE_CURRENT
-                );
-        mBuilder.setContentIntent(resultPendingIntent);
-        mBuilder.setAutoCancel(true);
-        NotificationManager mNotificationManager =
-                (NotificationManager) getSystemService(this.NOTIFICATION_SERVICE);
-
-        mNotificationManager.notify(Constant.NOTIFICATION_ID, mBuilder.build());
-    }
-
     public void checkDistance() {
         // for km multiplied by 0.001
         double distanceInKm = mStartLocation.distanceTo(mDestinationLocation) * 0.001;
         Log.i(TAG, "distance between " + distanceInKm);
         if (distanceInKm <= 1) {
-            sendNotification();
+            Intent intent = new Intent(this, Notifyservice.class);
+            startService(intent);
             updateStopButtonState();
         }
     }
