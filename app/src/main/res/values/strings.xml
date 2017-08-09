@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">ExiomsTask</string>
+    <string name="currnt_location">Current Location</string>
+    <string name="btn_start">START</string>
+    <string name="btn_stop">STOP</string>
+    <string name="dest_location">Destination Location</string>
 </resources>
