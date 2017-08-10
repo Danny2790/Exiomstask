@@ -80,16 +80,12 @@ public class MainActivity extends BaseActivity implements GoogleApiClient.Connec
         buttonStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                isNotified = false;
                 stopLocationUpdates();
                 buttonStart.setVisibility(View.VISIBLE);
                 buttonStop.setVisibility(View.GONE);
             }
         });
-
-        if (Utils.LocationPermissionAvailable(this)) {
-            Utils.showLocationAccessDialog(this);
-        }
-
     }
 
     @Override
@@ -142,6 +138,7 @@ public class MainActivity extends BaseActivity implements GoogleApiClient.Connec
         }
     }
 
+    /* launch autocomplete activity for locations*/
     public void onClickSpinner(View v) {
         try {
             Intent intent =
@@ -187,7 +184,6 @@ public class MainActivity extends BaseActivity implements GoogleApiClient.Connec
             } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
                 Status status = PlaceAutocomplete.getStatus(this, data);
                 Log.i(TAG, status.getStatusMessage());
-
             } else if (resultCode == RESULT_CANCELED) {
                 // The user canceled the operation.
             }
@@ -219,7 +215,6 @@ public class MainActivity extends BaseActivity implements GoogleApiClient.Connec
 
     @Override
     public void onLocationChanged(Location location) {
-        Log.i(TAG, "onlocationchanged : " + location);
         mStartLocation = location;
         checkDistance();
     }

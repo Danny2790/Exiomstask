@@ -4,12 +4,15 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
 
 import com.akash.exiomstask.Activities.MainActivity;
+import com.akash.exiomstask.Activities.NotificationActivity;
 import com.akash.exiomstask.Constants.Constant;
 import com.akash.exiomstask.R;
 
@@ -31,16 +34,18 @@ public class Notifyservice extends Service {
                         .setSmallIcon(R.drawable.ic_android_black_24dp)
                         .setContentTitle(Constant.NOTIFICATION_TITLE)
                         .setContentText(Constant.NOTIFICATION_MESSAGE);
-        Intent resultIntent = new Intent(this, MainActivity.class);
-
+        Intent resultIntent = new Intent(this, NotificationActivity.class);
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-        stackBuilder.addParentStack(MainActivity.class);
         stackBuilder.addNextIntent(resultIntent);
+        stackBuilder.addParentStack(MainActivity.class);
+
         PendingIntent resultPendingIntent =
                 stackBuilder.getPendingIntent(
                         0,
                         PendingIntent.FLAG_UPDATE_CURRENT
                 );
+        Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        mBuilder.setSound(alarmSound);
         mBuilder.setContentIntent(resultPendingIntent);
         mBuilder.setAutoCancel(true);
         NotificationManager mNotificationManager =

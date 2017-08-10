@@ -3,7 +3,6 @@
     package="com.akash.exiomstask">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application
@@ -13,20 +12,23 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyDErk8uC8gRJc7rxrBGUVggWMcWO_hHZpI" />
+
         <activity
             android:name=".Activities.MainActivity"
-            android:launchMode="singleTop">
+            android:launchMode="singleTop"></activity>
+
+        <service android:name=".Services.Notifyservice" />
+
+        <activity android:name=".Activities.ActivitySplashScreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name=".Services.Notifyservice"></service>
     </application>
 
 </manifest>
