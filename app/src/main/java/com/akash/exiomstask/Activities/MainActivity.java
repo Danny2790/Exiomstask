@@ -1,15 +1,14 @@
 package com.akash.exiomstask.Activities;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -18,6 +17,7 @@ import android.widget.TextView;
 import com.akash.exiomstask.Constants.Constant;
 import com.akash.exiomstask.R;
 import com.akash.exiomstask.Services.Notifyservice;
+import com.akash.exiomstask.Utilities.Utils;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
@@ -30,10 +30,6 @@ import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnSuccessListener;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.Locale;
 
 import static com.akash.exiomstask.Constants.Constant.FASTEST_INTERVAL;
 import static com.akash.exiomstask.Constants.Constant.UPDATE_INTERVAL;
@@ -50,6 +46,7 @@ public class MainActivity extends BaseActivity implements GoogleApiClient.Connec
     private Location mStartLocation;
     private Location mDestinationLocation;
     Boolean isNotified = false;
+    private AlertDialog permissionDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +66,7 @@ public class MainActivity extends BaseActivity implements GoogleApiClient.Connec
                     .addApi(LocationServices.API)
                     .build();
         }
+
         buttonStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -87,12 +85,17 @@ public class MainActivity extends BaseActivity implements GoogleApiClient.Connec
                 buttonStop.setVisibility(View.GONE);
             }
         });
+
+        if (Utils.LocationPermissionAvailable(this)) {
+            Utils.showLocationAccessDialog(this);
+        }
+
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        if (isNetworkAvailable()){
+        if (isNetworkAvailable()) {
             mGoogleApiClient.connect();
         }
     }
@@ -127,7 +130,6 @@ public class MainActivity extends BaseActivity implements GoogleApiClient.Connec
     }
 
     public void startLocationUpdates() {
-        Log.i("location", "start location update is called");
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             Log.i("location", "start location update permission granted");
             LocationRequest locationRequest = LocationRequest.create();
@@ -135,6 +137,8 @@ public class MainActivity extends BaseActivity implements GoogleApiClient.Connec
             locationRequest.setInterval(UPDATE_INTERVAL);
             locationRequest.setFastestInterval(FASTEST_INTERVAL);
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, locationRequest, this);
+        } else {
+            showLocationDialog();
         }
     }
 
@@ -159,39 +163,12 @@ public class MainActivity extends BaseActivity implements GoogleApiClient.Connec
                 @Override
                 public void onSuccess(Location location) {
                     if (location != null) {
-                        getAddress(location.getLatitude(), location.getLongitude());
                         Log.i(TAG, "latti" + location.getLatitude());
                     }
                 }
             });
         } catch (SecurityException e) {
             e.printStackTrace();
-        }
-    }
-
-    public void getAddress(double lat, double lng) {
-        Log.i(TAG, "Address called");
-        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
-        try {
-            List<Address> addresses = geocoder.getFromLocation(lat, lng, 1);
-            if (addresses.size() > 0) {
-                Address obj = addresses.get(0);
-                String add = obj.getAddressLine(0);
-                String street = obj.getAddressLine(0);
-                add = add + "\n" + obj.getCountryName();
-                add = add + "\n" + obj.getCountryCode();
-                add = add + "\n" + obj.getAdminArea();
-                add = add + "\n" + obj.getPostalCode();
-                add = add + "\n" + obj.getSubAdminArea();
-                add = add + "\n" + obj.getLocality();
-                add = add + "\n" + obj.getSubThoroughfare();
-                Log.i(TAG, "Address" + add);
-                //editTextCurrent.setText(street);
-            }
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-            //Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -219,12 +196,14 @@ public class MainActivity extends BaseActivity implements GoogleApiClient.Connec
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        Log.i(TAG, "onConnected: location called");
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Utils.showLocationAccessDialog(this);
         } else {
             mStartLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
-            Log.i(TAG, "onConnected: location " + mStartLocation.toString());
-            getAddress(mStartLocation.getLatitude(), mStartLocation.getLongitude());
+            startLocationUpdates();
+            if (mStartLocation != null) {
+                Log.i(TAG, "onConnected: location " + mStartLocation.toString());
+            }
         }
     }
 
@@ -243,5 +222,26 @@ public class MainActivity extends BaseActivity implements GoogleApiClient.Connec
         Log.i(TAG, "onlocationchanged : " + location);
         mStartLocation = location;
         checkDistance();
+    }
+
+    public void showLocationDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Permission Denied!");
+        builder.setMessage(Constant.LOCATION_PERMISSION_DENIED);
+        builder.setCancelable(false);
+        builder.setPositiveButton("SETTINGS", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Intent settingsOptionsIntent = new Intent(android.provider.Settings.ACTION_SETTINGS);
+                startActivityForResult(settingsOptionsIntent, Constant.SETTINGS_REQUEST);
+            }
+        }).setNegativeButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                permissionDialog.dismiss();
+            }
+        });
+        permissionDialog = builder.create();
+        permissionDialog.show();
     }
 }

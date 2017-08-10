@@ -63,7 +63,6 @@ public class BaseActivity extends AppCompatActivity {
             available = true;
             Log.i("network ", "NetworkAvailable: ");
         } else {
-            available = false;
             showNetworkDialog();
         }
         return available;
