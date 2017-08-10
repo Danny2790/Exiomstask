@@ -49,6 +49,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private GoogleApiClient mGoogleApiClient;
     private Location mStartLocation;
     private Location mDestinationLocation;
+    Boolean isNotified = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -94,7 +95,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         // for km multiplied by 0.001
         double distanceInKm = mStartLocation.distanceTo(mDestinationLocation) * 0.001;
         Log.i(TAG, "distance between " + distanceInKm);
-        if (distanceInKm <= 1) {
+        if (distanceInKm <= 1 && !isNotified) {
+            isNotified = true;
             Intent intent = new Intent(this, Notifyservice.class);
             startService(intent);
             updateStopButtonState();
@@ -191,6 +193,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == Constant.PLACE_AUTOCOMPLETE_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
+                isNotified = false;
                 Place place = PlaceAutocomplete.getPlace(this, data);
                 LatLng placeLatLng = place.getLatLng();
                 mDestinationLocation.setLatitude(placeLatLng.latitude);
