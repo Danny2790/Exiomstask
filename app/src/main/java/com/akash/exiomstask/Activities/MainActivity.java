@@ -38,7 +38,7 @@ import java.util.Locale;
 import static com.akash.exiomstask.Constants.Constant.FASTEST_INTERVAL;
 import static com.akash.exiomstask.Constants.Constant.UPDATE_INTERVAL;
 
-public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener {
+public class MainActivity extends BaseActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener {
 
     private String TAG = MainActivity.class.getSimpleName();
     TextView textViewCurrent;
@@ -69,8 +69,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     .addApi(LocationServices.API)
                     .build();
         }
-        mGoogleApiClient.connect();
-
         buttonStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -89,6 +87,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 buttonStop.setVisibility(View.GONE);
             }
         });
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (isNetworkAvailable()){
+            mGoogleApiClient.connect();
+        }
     }
 
     public void checkDistance() {
