@@ -10,14 +10,10 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.akash.exiomstask.Constants.Constant;
 import com.akash.exiomstask.R;
@@ -45,7 +41,7 @@ import static com.akash.exiomstask.Constants.Constant.UPDATE_INTERVAL;
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, com.google.android.gms.location.LocationListener {
 
     private String TAG = MainActivity.class.getSimpleName();
-    EditText editTextCurrent;
+    TextView textViewCurrent;
     TextView textViewDestination;
     Button buttonStart;
     Button buttonStop;
@@ -59,28 +55,11 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        editTextCurrent = (EditText) findViewById(R.id.et_current);
+        textViewCurrent = (TextView) findViewById(R.id.tv_current);
         textViewDestination = (TextView) findViewById(R.id.tv_destination);
         buttonStart = (Button) findViewById(R.id.btn_start);
         buttonStop = (Button) findViewById(R.id.btn_stop);
         mDestinationLocation = new Location("destination location");
-
-        editTextCurrent.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                updateStartButtonState();
-            }
-        });
 
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -128,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     }
 
     public void updateStartButtonState() {
-        if (editTextCurrent.getText().length() != 0 && textViewDestination.getText().length() != 0) {
+        if (textViewDestination.getText().length() != 0) {
             buttonStart.setVisibility(View.VISIBLE);
         } else {
             buttonStart.setVisibility(View.GONE);
@@ -160,7 +139,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         } catch (GooglePlayServicesRepairableException e) {
             e.printStackTrace();
         } catch (GooglePlayServicesNotAvailableException e) {
-            // TODO: Handle the error.
+            e.printStackTrace();
         }
     }
 
@@ -199,12 +178,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 add = add + "\n" + obj.getLocality();
                 add = add + "\n" + obj.getSubThoroughfare();
                 Log.i(TAG, "Address" + add);
-                editTextCurrent.setText(street);
+                //editTextCurrent.setText(street);
             }
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-            Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 

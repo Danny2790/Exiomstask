@@ -2,4 +2,6 @@
 <resources>
     <dimen name="margin_horizontal">10dp</dimen>
     <dimen name="margin_vertical">10dp</dimen>
+    <dimen name="text_size">16sp</dimen>
+    <dimen name="btn_width">150dp</dimen>
 </resources>

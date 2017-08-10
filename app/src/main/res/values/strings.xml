@@ -4,4 +4,5 @@
     <string name="btn_start">START</string>
     <string name="btn_stop">STOP</string>
     <string name="dest_location">Destination Location</string>
+    <string name="text_location">Your Location</string>
 </resources>
